@@ -27,8 +27,8 @@ urlpatterns = [
     
     # App URLs
     path('api/core/', include('apps.core.urls')),
+    path('api/rides/', include('apps.rides.urls')),
     # path('api/users/', include('apps.users.urls')),
-    # path('api/rides/', include('apps.rides.urls')),
     # path('api/pooling/', include('apps.pooling.urls')),
     # path('api/pricing/', include('apps.pricing.urls')),
 ]

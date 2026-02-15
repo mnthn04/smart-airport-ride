@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Pooling | Dashboard</title>
+    <link rel="stylesheet" href="/static/core/css/dashboard.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚕 Smart Airport Pooling</h1>
+            <p>Sustainable. Social. Smart.</p>
+        </div>
+
+        <div class="nav">
+            <div class="nav-brand">DEV Booking System</div>
+            <div class="nav-links">
+                <a href="{% url 'dashboard' %}">🏠 Home</a>
+                <a href="{% url 'create_ride_view' %}">✨ Create Ride</a>
+                <a href="{% url 'view_pools_view' %}">👥 Active Pools</a>
+            </div>
+        </div>
+
+        {% if messages %}
+        <div class="card" style="background: var(--secondary); border: none;">
+            {% for message in messages %}
+            <p style="margin: 0;">{{ message }}</p>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,53 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2>Book a Ride</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Select User</label>
+            <select name="user_id" required>
+                {% for user in users %}
+                <option value="{{ user.id }}">{{ user.name }} ({{ user.phone }})</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+                <label>Pickup Latitude</label>
+                <input type="number" step="any" name="pickup_lat" value="12.9716" required>
+            </div>
+            <div class="form-group">
+                <label>Pickup Longitude</label>
+                <input type="number" step="any" name="pickup_lng" value="77.5946" required>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+                <label>Drop Latitude</label>
+                <input type="number" step="any" name="drop_lat" value="13.1986" required>
+            </div>
+            <div class="form-group">
+                <label>Drop Longitude</label>
+                <input type="number" step="any" name="drop_lng" value="77.7066" required>
+            </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px;">
+            <div class="form-group">
+                <label>Seats</label>
+                <input type="number" name="seats_required" value="1" min="1" required>
+            </div>
+            <div class="form-group">
+                <label>Luggage</label>
+                <input type="number" name="luggage_units" value="1" min="0" required>
+            </div>
+            <div class="form-group">
+                <label>Detour Tolerance (min)</label>
+                <input type="number" name="detour_tolerance_minutes" value="15" required>
+            </div>
+        </div>
+        <button type="submit" class="btn">Confirm Booking</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,38 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="card">
+    <h2>Active Pools</h2>
+    {% for pool in pools %}
+    <div class="card" style="border: 1px solid var(--border-color); box-shadow: none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0;">Pool #{{ pool.id }} - {{ pool.cab.driver_name }}</h3>
+            <span class="btn-secondary" style="padding: 4px 12px; border-radius: 20px; font-size: 13px;">{{ pool.status
+                }}</span>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Sequence</th>
+                    <th>User</th>
+                    <th>Seats</th>
+                    <th>Pickup ETA</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for member in pool.members.all %}
+                <tr>
+                    <td>{{ member.sequence_order }}</td>
+                    <td>{{ member.ride_request.user.name }}</td>
+                    <td>{{ member.ride_request.seats_required }}</td>
+                    <td>{{ member.pickup_eta|default:"Pending" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% empty %}
+    <p style="text-align: center; color: var(--text-muted);">No active pools at the moment.</p>
+    {% endfor %}
+</div>
+{% endblock %}

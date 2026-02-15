@@ -33,6 +33,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'drf_yasg',
     'corsheaders',
+    'django_celery_beat',
 ]
 
 LOCAL_APPS = [
@@ -78,11 +79,29 @@ WSGI_APPLICATION = 'config.wsgi.application'
 ASGI_APPLICATION = 'config.asgi.application'
 
 # Database
+# Using SQLite as the main database with configuration for concurrency
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
-    'default': env.db('DATABASE_URL', default='sqlite:///db.sqlite3')
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+        'OPTIONS': {
+            'timeout': 20,  # Increased timeout for concurrent writes
+        },
+    }
 }
+
+# SQLite WAL mode for better concurrency
+from django.db.backends.signals import connection_created
+from django.dispatch import receiver
+
+@receiver(connection_created)
+def set_sqlite_pragma(sender, connection, **kwargs):
+    if connection.vendor == 'sqlite':
+        cursor = connection.cursor()
+        cursor.execute('PRAGMA journal_mode=WAL;')
+        cursor.execute('PRAGMA synchronous=NORMAL;')
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -145,6 +164,36 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+
+# For easier local demo without Redis
+# Run tasks synchronously if Redis is not available
+CELERY_TASK_ALWAYS_EAGER = env.bool('CELERY_TASK_ALWAYS_EAGER', default=DEBUG)
+CELERY_TASK_EAGER_PROPAGATES = True
+
+# Cache configuration with Redis fallback to LocMem
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': env('REDIS_URL', default='redis://localhost:6379/1'),
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'IGNORE_EXCEPTIONS': True, # Graceful fallback if Redis is down
+        }
+    }
+}
+
+if env.bool('USE_LOCMEM_CACHE', default=True):
+    # Only use Redis if specifically configured or reachable
+    # For this interview demo, we default to something that "just works"
+    try:
+        import redis
+        client = redis.StrictRedis.from_url(CACHES['default']['LOCATION'])
+        client.ping()
+    except Exception:
+        CACHES['default'] = {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+            'LOCATION': 'unique-snowflake',
+        }
 
 # Logging
 LOGGING = {
